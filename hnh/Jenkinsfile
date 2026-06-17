@@ -30,11 +30,11 @@ stages {
         }
     }
 
-    stage('Deploy with Ansible') {
-        steps {
-            sh 'cd hnh && ansible-playbook -i inventory.ini playbook.yml'
-        }
-    }
+    // stage('Deploy with Ansible') {
+    //     steps {
+    //         sh 'cd hnh && ansible-playbook -i inventory.ini playbook.yml'
+    //     }
+    // }
 }
 
 post {
