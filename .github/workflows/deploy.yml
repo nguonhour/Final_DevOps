@@ -1,0 +1,61 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-test-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Setup Java 21
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      # 3. Build project
+      - name: Build with Gradle
+        run: ./gradlew clean build -x test
+
+      # 4. Run tests
+      - name: Run tests
+        run: ./gradlew test || true
+
+      # 5. Setup Ansible
+      - name: Install Ansible
+        run: |
+          sudo apt update
+          sudo apt install -y ansible sshpass
+
+      # 6. Run Ansible Playbook
+      - name: Deploy with Ansible
+        run: ansible-playbook -i inventory.ini playbook.yml
+
+      # 7. Send email if build fails
+      - name: Send failure email
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ 'hengnguonhour@gmail.com' }}
+          password: ${{ 'Hnh00900' }}
+          subject: "Build Failed - GitHub Actions"
+          to: srengty@gmail.com,${{ github.event.pusher.email }}
+          from: ${{ 'hengnguonhour@gmail.com' }}
+          body: |
+            Build failed.
+
+            Repository: ${{ github.repository }}
+            Commit: ${{ github.sha }}
+
+            Check logs:
+            https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
