@@ -1,0 +1,416 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <title>ID Card System</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background: linear-gradient(135deg, #eef2ff, #f8fafc);
+        min-height: 100vh;
+        font-family: Arial, sans-serif;
+      }
+
+      .main-card {
+        border: none;
+        border-radius: 20px;
+        overflow: hidden;
+      }
+
+      .form-section {
+        padding: 30px;
+      }
+
+      .preview-section {
+        background: #f8fafc;
+        padding: 30px;
+      }
+
+      .card-preview {
+        width: 100%;
+        max-width: 420px;
+        min-height: 280px;
+        border-radius: 20px;
+        padding: 25px;
+        background: linear-gradient(135deg, #2563eb, #1e3a8a);
+        color: white;
+        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.2);
+        position: relative;
+      }
+
+      .organization {
+        font-size: 13px;
+        opacity: 0.9;
+      }
+
+      .avatar-preview {
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid white;
+        background: #e2e8f0;
+      }
+
+      .reg-number {
+        font-size: 13px;
+        padding: 4px 12px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 30px;
+        display: inline-block;
+      }
+
+      .preview-footer {
+        position: absolute;
+        bottom: 15px;
+        left: 25px;
+        right: 25px;
+        font-size: 11px;
+        opacity: 0.8;
+      }
+
+      .form-control,
+      .form-select {
+        border-radius: 10px;
+      }
+
+      .btn-custom {
+        border-radius: 10px;
+        padding: 12px;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container py-5">
+      <div class="text-center mb-4">
+        <h1 class="fw-bold text-primary">ID Card Management System</h1>
+        <p class="text-muted">Student & Employee Identification Generator</p>
+      </div>
+
+      <div
+        th:if="${message}"
+        class="alert alert-success alert-dismissible fade show"
+        role="alert"
+      >
+        <span th:text="${message}">Success message</span>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div
+        th:if="${error}"
+        class="alert alert-danger alert-dismissible fade show"
+        role="alert"
+      >
+        <span th:text="${error}">Error message</span>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
+      </div>
+
+      <div class="card shadow-lg main-card mb-5">
+        <div class="row g-0">
+          <div class="col-md-6 form-section">
+            <h3 class="mb-4">Create Profile</h3>
+
+            <form
+              th:action="@{/profiles/create}"
+              method="post"
+              enctype="multipart/form-data"
+            >
+              <div class="mb-3">
+                <input
+                  class="form-control"
+                  type="text"
+                  name="fullName"
+                  id="fullName"
+                  placeholder="Full Name"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <input
+                  class="form-control"
+                  type="email"
+                  name="email"
+                  id="email"
+                  placeholder="Email"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <input
+                  class="form-control"
+                  type="text"
+                  name="phone"
+                  id="phone"
+                  placeholder="Phone"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <select class="form-select" name="department" id="department">
+                  <option value="">Select Department</option>
+                  <option value="GIC">GIC</option>
+                  <option value="CS">CS</option>
+                  <option value="IT">IT</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label for="photo" class="form-label text-muted small"
+                  >Profile Picture (JPG/PNG)</label
+                >
+                <input
+                  class="form-control"
+                  type="file"
+                  name="file"
+                  id="photo"
+                  accept=".jpg,.jpeg,.png"
+                />
+              </div>
+
+              <div class="mb-4">
+                <select class="form-select" name="profileType" id="profileType">
+                  <option value="STUDENT">Student</option>
+                  <option value="EMPLOYEE">Employee</option>
+                  <option value="USER">User</option>
+                </select>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-custom w-100">
+                Create ID Card
+              </button>
+            </form>
+          </div>
+
+          <div
+            class="col-md-6 preview-section d-flex flex-column align-items-center justify-content-start"
+          >
+            <h3 class="w-100 mb-4 text-start">Live Preview</h3>
+
+            <div class="card-preview w-100 mb-3">
+              <div
+                class="d-flex justify-content-between align-items-center mb-2"
+              >
+                <div>
+                  <h4 class="mb-0 fw-bold">ID CARD</h4>
+                  <div class="organization">
+                    Institute of Technology of Cambodia
+                  </div>
+                </div>
+
+                <img
+                  id="avatarPreview"
+                  class="avatar-preview"
+                  th:src="${profile != null && profile.photoFileName != null} ? @{'/uploads/' + ${profile.photoFileName}} : 'data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%2364748b\'><path d=\'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5-4-8-4z\'/></svg>'"
+                  alt="Avatar"
+                />
+              </div>
+
+              <hr class="my-2 bg-white" />
+
+              <div class="lh-sm">
+                <h3
+                  id="previewName"
+                  class="fw-bold mb-2"
+                  th:text="${profile != null} ? ${profile.fullName} : 'Your Name'"
+                >
+                  Your Name
+                </h3>
+                <p
+                  id="previewEmail"
+                  class="mb-1 text-truncate"
+                  th:text="${profile != null} ? ${profile.email} : 'Email'"
+                >
+                  Email
+                </p>
+                <p
+                  id="previewPhone"
+                  class="mb-1"
+                  th:text="${profile != null} ? ${profile.phone} : 'Phone'"
+                >
+                  Phone
+                </p>
+                <p class="mb-1">
+                  <strong>Department:</strong>
+                  <span
+                    id="previewDepartment"
+                    th:text="${profile != null && profile.department != null} ? ${profile.department} : 'Not selected'"
+                    >Not selected</span
+                  >
+                </p>
+                <p class="mb-3">
+                  <strong>Type:</strong>
+                  <span
+                    id="previewType"
+                    th:text="${profile != null} ? ${profile.profileType} : 'Student'"
+                    >Student</span
+                  >
+                </p>
+              </div>
+
+              <div
+                class="reg-number mb-4"
+                id="previewReg"
+                th:text="${profile != null} ? 'Registration: ' + ${profile.registrationNumber} : 'Registration: 2026-DEPT-001'"
+              >
+                Registration: 2026-DEPT-001
+              </div>
+
+              <div class="preview-footer d-flex justify-content-between">
+                <span>Scan QR for verification</span>
+                <span class="fw-bold text-white-50">HNH System</span>
+              </div>
+            </div>
+
+            <div class="w-100 px-2">
+              <a
+                th:if="${profile != null && profile.id != null}"
+                th:href="@{'/profile/' + ${profile.id} + '/pdf'}"
+                target="_blank"
+                class="btn btn-danger btn-custom w-100 py-2 shadow-sm d-flex align-items-center justify-content-center gap-2"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  fill="currentColor"
+                  class="bi bi-file-earmark-pdf-fill"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    d="M5.523 12.424c.14-.082.293-.162.459-.238a7.878 7.878 0 0 1-.45.606c-.28.33-.52.425-.656.387-.138-.04-.2-.22-.16-.557m2.812-4.116c.038-.214.067-.428.086-.641a22.251 22.251 0 0 0-.168 2.295c.069-.54.1-.11.082-.654m-.58 1.954a11.772 11.772 0 0 0 .722-1.253c.086-.153.173-.335.253-.554a9.541 9.541 0 0 1-.225 1.53c-.22.1-.427.198-.65.277m6.531-3.72c-.157-.167-.361-.345-.583-.521a9.851 9.851 0 0 0-.653-.455C13.1 4.326 12.845 4 12.5 4c-.147 0-.267.115-.316.261l-.031.093c-.04.12-.054.264-.04.423.017.197.067.446.142.747.056.223.13.472.217.746a30.69 30.69 0 0 1 .716 3.82c.164.866.304 1.62.408 2.23.076.446.13.805.158 1.055.015.137.022.234.02.292v.041c-.004.053-.025.13-.063.214-.04.088-.1.168-.178.228-.14.11-.344.152-.573.105-.228-.046-.487-.197-.745-.427a9.309 9.309 0 0 1-.43-.41c-.132-.14-.265-.294-.399-.459a11.554 11.554 0 0 1-.29-.379c-.102-.142-.2-.295-.294-.457a31.233 31.233 0 0 1-2.513-5.323c-.092-.245-.18-.5-.262-.765A24.498 24.498 0 0 1 7.7 4.148c-.015-.246-.017-.492-.006-.729a1.99 1.99 0 0 1 .085-.436c.06-.184.164-.325.304-.412C8.228 2.484 8.366 2.45 8.5 2.45c.408 0 .74.341.812.818l.011.082c.014.137.016.303.003.493a7.818 7.818 0 0 1-.073.665c-.04.22-.097.471-.167.746A15.311 15.311 0 0 1 7.81 7.632a21.148 21.148 0 0 0-.648 1.732c-.179.563-.352 1.157-.514 1.777l-.063.243a29.13 29.13 0 0 0-.66 3.036c-.05.32-.092.637-.123.948-.03.311-.047.606-.048.88 0 .093.005.176.012.247.01.106.027.202.052.287.051.171.142.302.26.381.12.08.261.112.408.096a1.206 1.206 0 0 0 .548-.225c.165-.133.32-.317.464-.543a7.41 7.41 0 0 0 .382-.7c.105-.23.197-.48.277-.745a27.042 27.042 0 0 0 .52-2.32c.046-.299.083-.591.11-.868.026-.277.041-.53.044-.75l.003-.141a14.73 14.73 0 0 0-.011-1.185c-.011-.383-.032-.731-.06-1.025a17.215 17.215 0 0 1 2.307 4.141c.173.398.33.805.467 1.21.137.404.25.795.339 1.157.088.36.147.689.174.965.026.276.023.49-.005.626a.417.417 0 0 1-.044.135.253.253 0 0 1-.096.094c-.053.031-.131.05-.233.054a1.002 1.002 0 0 1-.418-.105c-.157-.083-.34-.233-.537-.442a8.552 8.552 0 0 1-.497-.621c-.147-.215-.298-.46-.448-.73a11.234 11.234 0 0 1-.39-.797 33.722 33.722 0 0 0-1.89-4.101q-.28-.53-.585-1.018a20.45 20.45 0 0 1-.77-1.42 21.056 21.056 0 0 0-.46-1.042q-.323-.69-.705-1.3c-.156-.252-.321-.49-.494-.712a14.544 14.544 0 0 0-.585-.689 1.154 1.154 0 0 0-.256-.208.503.503 0 0 0-.247-.058c-.137 0-.265.052-.375.148-.11.096-.192.23-.237.394a1.326 1.326 0 0 0-.022.617c.023.237.085.516.183.824.098.309.237.649.412 1.009.176.36.386.732.618 1.103.466.744.99 1.455 1.542 2.112.553.658 1.118 1.254 1.678 1.777q.4.37.813.71c.311.256.626.494.94.708a11.144 11.144 0 0 1 .442-.71c.148-.22.298-.44.449-.654.152-.215.304-.424.455-.623A19.29 19.29 0 0 0 5.523 12.42zM4.148 13.56c.046-.198.14-.383.273-.541a5.617 5.617 0 0 1 .536-.532l.068-.057c.1-.078.204-.15.311-.219.071-.045.147-.089.223-.131a4.417 4.417 0 0 0-.324.464c-.1.163-.195.342-.284.536a3.832 3.832 0 0 0-.194.55c-.04.164-.067.33-.082.493a.465.465 0 0 1-.09-.126c-.04-.085-.058-.184-.051-.298m2.186-2.1c-.15-.123-.3-.255-.453-.396-.153-.14-.302-.294-.447-.457a15.741 15.741 0 0 1-.643-.811c-.173-.243-.33-.497-.472-.756A11.18 11.18 0 0 1 4.02 8.01a4.805 4.805 0 0 1-.137-.626 1.4 1.4 0 0 1 .012-.497c.01-.06.027-.113.048-.156a.14.14 0 0 1 .127-.073c.045 0 .093.012.143.036.05.023.1.06.15.105.098.093.2.214.304.36.106.148.216.324.324.524.218.4.437.86.643 1.353.205.493.394 1.01.554 1.53zM10 11.516c.043.264.072.545.086.837a24.24 24.24 0 0 1-.113 2.656 22.043 22.043 0 0 1-.165-2.434c-.005-.333-.002-.676.012-1.014q.015-.373.047-.732q.06.345.133.687m.549-3.414c.057.195.108.397.153.604q.044.205.074.415a13.332 13.332 0 0 0-.411-1.503c-.1-.322-.213-.637-.336-.94a18.825 18.825 0 0 1 .52 1.424z"
+                  />
+                </svg>
+                Download ID Card PDF
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card shadow main-card p-4 col-md-12">
+        <h3 class="mb-3 text-secondary">Batch ID Card Processing</h3>
+        <p class="text-muted small">
+          Upload a bulk data text spreadsheet profile layout line sequence (.csv
+          standard layout) to generate records simultaneously.
+        </p>
+        <form
+          th:action="@{/profiles/batch}"
+          method="post"
+          enctype="multipart/form-data"
+          class="row g-3 align-items-center"
+        >
+          <div class="col-sm-9">
+            <input
+              type="file"
+              name="csvFile"
+              id="csvFile"
+              class="form-control"
+              accept=".csv"
+              required
+            />
+          </div>
+          <div class="col-sm-3">
+            <button
+              type="submit"
+              class="btn btn-secondary btn-custom w-100 py-2"
+            >
+              Upload Batch CSV
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const nameInput = document.getElementById("fullName");
+        const emailInput = document.getElementById("email");
+        const phoneInput = document.getElementById("phone");
+        const deptSelect = document.getElementById("department");
+        const typeSelect = document.getElementById("profileType");
+        const photoInput = document.getElementById("photo");
+
+        const outName = document.getElementById("previewName");
+        const outEmail = document.getElementById("previewEmail");
+        const outPhone = document.getElementById("previewPhone");
+        const outDept = document.getElementById("previewDepartment");
+        const outType = document.getElementById("previewType");
+
+        if (nameInput) {
+          nameInput.addEventListener("input", function () {
+            outName.textContent =
+              nameInput.value.trim() !== ""
+                ? nameInput.value.trim()
+                : "Your Name";
+          });
+        }
+
+        if (emailInput) {
+          emailInput.addEventListener("input", function () {
+            outEmail.textContent =
+              emailInput.value.trim() !== ""
+                ? emailInput.value.trim()
+                : "Email";
+          });
+        }
+
+        if (phoneInput) {
+          phoneInput.addEventListener("input", function () {
+            outPhone.textContent =
+              phoneInput.value.trim() !== ""
+                ? phoneInput.value.trim()
+                : "Phone";
+          });
+        }
+
+        if (deptSelect) {
+          deptSelect.addEventListener("change", function () {
+            outDept.textContent =
+              deptSelect.value !== "" ? deptSelect.value : "Not selected";
+          });
+        }
+
+        if (typeSelect) {
+          typeSelect.addEventListener("change", function () {
+            const rawType = typeSelect.value;
+            outType.textContent =
+              rawType.charAt(0).toUpperCase() + rawType.slice(1).toLowerCase();
+          });
+        }
+
+        if (photoInput) {
+          photoInput.addEventListener("change", function (event) {
+            const uploadedFile = event.target.files[0];
+            if (uploadedFile) {
+              const fileReader = new FileReader();
+              fileReader.onload = function (e) {
+                const targetImg = document.getElementById("avatarPreview");
+                if (targetImg) {
+                  targetImg.src = e.target.result;
+                }
+              };
+              fileReader.readAsDataURL(uploadedFile);
+            }
+          });
+        }
+      });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
