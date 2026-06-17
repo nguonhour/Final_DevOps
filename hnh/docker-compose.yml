@@ -2,6 +2,14 @@ version: "3.9"
 
 services:
 
+  jenkins:
+    build:
+      context: .
+      dockerfile: Dockerfile.jenkins
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+
   web:
     build: .
     image: hnh-app:latest
