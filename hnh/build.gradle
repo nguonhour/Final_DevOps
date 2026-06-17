@@ -28,6 +28,7 @@ dependencies {
 	// implementation 'org.flywaydb:flyway-core'
 	
 	runtimeOnly 'com.mysql:mysql-connector-j'
+	runtimeOnly 'org.xerial:sqlite-jdbc:3.45.1.0'
 
 	// implementation 'org.springframework.boot:spring-boot-starter-security'
 

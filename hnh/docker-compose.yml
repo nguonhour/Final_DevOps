@@ -4,27 +4,28 @@ services:
 
   web:
     build: .
+    image: hnh-app:latest
     container_name: hnh-web
-
+    restart: always
     ports:
-      - "8443:8090"
       - "2222:22"
+      - "8443:8443"
 
     depends_on:
       - mysql
 
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/heng_nguonhour_db
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/heng_nguonhour_db?createDatabaseIfNotExist=true&useSSL=false
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: Hnh00900
 
   mysql:
     image: mysql:8
     container_name: hnh-mysql
-
+    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: Hnh00900
       MYSQL_DATABASE: heng_nguonhour_db
 
     ports:
-      - "3306:3306"
+      - "3307:3306"

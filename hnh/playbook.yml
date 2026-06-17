@@ -1,0 +1,38 @@
+---
+- name: Automate Web Server Deployment and Database Backup
+  hosts: webserver
+  gather_facts: false
+  tasks:
+    # 1. RUN GIT PULL form main
+    - name: Pull the latest code from the main branch of the Git repository
+      git:
+        repo: "https://github.com/nguonhour/Final_DevOps.git"
+        dest: /app
+        version: main
+        force: yes
+
+    # 2. BUILD USING GRADLE
+    - name: Compile and package the application binary using Gradle Wrapper
+      command: ./gradlew build -x test
+      args:
+        chdir: /app
+
+    # 3. RUN TEST AGAINST SQLITE DATABASE
+    - name: Execute profile validation test profiles matching SQLite profile properties
+      command: ./gradlew test --tests "com.nguonhour.hnh.service.ProfileServiceTest"
+      args:
+        chdir: /app
+      environment:
+        SPRING_PROFILES_ACTIVE: test
+
+    # 4. BACKUP THE PRODUCTION MYSQL DATABASE (Matches your required group exam guidelines)
+    - name: Generate production MySQL SQL structure and record data dump backup
+      shell: "mysqldump -h mysql -u root -p'Hnh00900' heng_nguonhour_db > /app/backup.sql"
+      register: backup_result
+
+    # 5. FETCH BACKUP FILE TO YOUR MACBOOK
+    - name: Download the backup file locally to host MacBook machine for submission
+      fetch:
+        src: /app/backup.sql
+        dest: ./backup.sql
+        flat: yes

@@ -1,0 +1,60 @@
+pipeline {
+agent any
+
+triggers {
+    // Poll Git every 5 minutes
+    pollSCM('H/5 * * * *')
+}
+
+environment {
+    EMAIL_TO = 'srengty@gmail.com'
+}
+
+stages {
+
+    stage('Pull Latest Code') {
+        steps {
+            git branch: 'main', url: 'https://github.com/nguonhour/Final_DevOps.git'
+        }
+    }
+
+    stage('Build') {
+        steps {
+            sh './gradlew clean build'
+        }
+    }
+
+    stage('Test (SQLite)') {
+        steps {
+            sh './gradlew test'
+        }
+    }
+
+    stage('Deploy with Ansible') {
+        steps {
+            sh 'ansible-playbook -i inventory.ini playbook.yml'
+        }
+    }
+}
+
+post {
+    failure {
+        mail to: "${EMAIL_TO}",
+             subject: "Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+             body: """
+
+Build failed.
+
+Project: ${env.JOB_NAME}
+Build Number: ${env.BUILD_NUMBER}
+Check Jenkins console:
+${env.BUILD_URL}
+"""
+}
+
+    success {
+        echo 'Deployment Successful'
+    }
+}
+
+}
