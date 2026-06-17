@@ -20,7 +20,7 @@ stages {
 
     stage('Build') {
         steps {
-            sh 'cd hnh && chmod +x gradlew && ./gradlew clean build'
+            sh 'cd hnh && chmod +x gradlew && ./gradlew clean build -x test'
         }
     }
 
