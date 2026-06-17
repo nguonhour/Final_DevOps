@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mysql
+  labels:
+    app: mysql # Added this label so the app container can locate it via a service
+spec:
+  containers:
+    - name: mysql
+      image: mysql:8
+      env: # FIX: Removed the duplicate nested env block
+        - name: MYSQL_ROOT_PASSWORD
+          value: "Hnh00900"
+        - name: MYSQL_DATABASE
+          value: "heng_nguonhour_db"
+        - name: MYSQL_USER
+          value: "hour"
+        - name: MYSQL_PASSWORD
+          value: "12345" # FIX: Quoted numerical strings
+      ports:
+        - containerPort: 3306
