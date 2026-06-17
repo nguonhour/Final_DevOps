@@ -20,19 +20,19 @@ stages {
 
     stage('Build') {
         steps {
-            sh './gradlew clean build'
+            sh 'cd hnh && chmod +x gradlew && ./gradlew clean build'
         }
     }
 
     stage('Test (SQLite)') {
         steps {
-            sh './gradlew test'
+            sh 'cd hnh && ./gradlew test'
         }
     }
 
     stage('Deploy with Ansible') {
         steps {
-            sh 'ansible-playbook -i inventory.ini playbook.yml'
+            sh 'cd hnh && ansible-playbook -i inventory.ini playbook.yml'
         }
     }
 }
